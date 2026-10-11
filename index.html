@@ -136,10 +136,24 @@
     .big-score{font-size:52px;}
     .stat{padding:0 14px;}
   }
+  /* 页面内自定义对话框（避免在内嵌预览中调用原生对话框） */
+  .modal-mask{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:1000;
+    display:none;align-items:center;justify-content:center;padding:20px;}
+  .modal-mask.show{display:flex;}
+  .modal-box{background:#fff;border-radius:14px;max-width:430px;width:100%;
+    box-shadow:0 20px 60px rgba(15,23,42,.3);overflow:hidden;animation:modalIn .16s ease-out;}
+  @keyframes modalIn{from{transform:translateY(12px) scale(.98);opacity:0;}to{transform:none;opacity:1;}}
+  .modal-body{padding:24px 24px 18px;font-size:15.5px;line-height:1.7;color:#1f2937;white-space:pre-wrap;word-break:break-word;}
+  .modal-input{width:100%;margin-top:12px;padding:11px 13px;font-size:15px;border:1.5px solid #cbd5e1;
+    border-radius:9px;outline:none;}
+  .modal-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:0 20px 20px;}
+  .modal-actions .btn{padding:10px 22px;font-size:15px;}
   @media print{
     body{background:#fff;}
     .no-print{display:none !important;}
     .score-card{box-shadow:none;border:1px solid #ccc;}
+    .modal-mask{display:none !important;}
   }
 </style>
 </head>
@@ -243,6 +257,14 @@
   <footer class="no-print">
     本测试在当前浏览器记录答题情况，提交前请确认设备正常&nbsp;&nbsp;|&nbsp;&nbsp;<a id="teacher-link">教师管理</a>
   </footer>
+</div>
+
+<!-- 页面内自定义对话框 -->
+<div class="modal-mask" id="modal-mask" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
 </div>
 
 <script>
@@ -356,6 +378,51 @@ function show(v){
   ["view-login","view-exam","view-result"].forEach(function(x){$(x).style.display=(x===v?"block":"none");});
   window.scrollTo(0,0);
 }
+
+/* ===== 页面内对话框（替代原生 alert/confirm/prompt，兼容内嵌预览环境） ===== */
+function uiModal(opts){
+  /* opts: {text, input, placeholder, okText, cancelText, danger} -> Promise<string|boolean|null> */
+  return new Promise(function(resolve){
+    var mask=$("modal-mask"), body=$("modal-body"), actions=$("modal-actions");
+    body.textContent = opts.text||"";
+    var inputEl=null;
+    if(opts.input){
+      inputEl=document.createElement("input");
+      inputEl.type="text";
+      inputEl.className="modal-input";
+      inputEl.placeholder=opts.placeholder||"";
+      body.appendChild(inputEl);
+    }
+    actions.innerHTML="";
+    function close(v){
+      mask.classList.remove("show");
+      document.removeEventListener("keydown",onKey,true);
+      resolve(v);
+    }
+    function mkBtn(txt,primary,onClick){
+      var b=document.createElement("button");
+      b.className="btn "+(primary?"":"ghost");
+      if(primary&&opts.danger){b.style.background="#dc2626";b.onmouseover=function(){b.style.background="#b91c1c";};}
+      b.textContent=txt;b.onclick=onClick;return b;
+    }
+    if(opts.cancelText!==null){
+      actions.appendChild(mkBtn(opts.cancelText||"取消",false,function(){close(opts.input?null:false);}));
+    }
+    actions.appendChild(mkBtn(opts.okText||"确定",true,function(){
+      if(opts.input){close(inputEl.value);}else{close(true);}
+    }));
+    function onKey(e){
+      if(e.key==="Escape"){e.stopPropagation();close(opts.input?null:false);}
+      if(e.key==="Enter"&&opts.input){e.stopPropagation();close(inputEl.value);}
+    }
+    document.addEventListener("keydown",onKey,true);
+    mask.classList.add("show");
+    if(inputEl){setTimeout(function(){inputEl.focus();},30);}
+  });
+}
+function uiAlert(text,okText){return uiModal({text:text,okText:okText||"我知道了",cancelText:null});}
+function uiConfirm(text,okText,danger){return uiModal({text:text,okText:okText||"确定",cancelText:"取消",danger:!!danger});}
+function uiPrompt(text,placeholder){return uiModal({text:text,input:true,placeholder:placeholder||"",okText:"确定",cancelText:"取消"});}
 
 /* ================= 登录 ================= */
 $("btn-login").onclick = function(){
@@ -503,14 +570,23 @@ window.addEventListener("beforeunload",function(e){
 });
 
 /* ================= 提交与判分 ================= */
-function doSubmit(){
+var submitting=false;
+async function doSubmit(){
+  if(submitting)return;
   var answered = Object.keys(currentRec.answers).filter(function(k){return currentRec.answers[k];}).length;
   var blank = 50 - answered;
   var msg = blank>0
     ? "你还有 "+blank+" 道题未作答（未作答不得分）。确定现在提交吗？提交后不能再次作答。"
     : "确定提交试卷吗？提交后将立即显示成绩，且不能再次作答。";
-  if(!window.confirm(msg))return;
-  if(blank>0 && !window.confirm("请再次确认：还有 "+blank+" 道题未答，提交后无法修改。是否确认提交？"))return;
+  submitting=true;
+  try{
+    var ok1 = await uiConfirm(msg,"确认提交",true);
+    if(!ok1)return;
+    if(blank>0){
+      var ok2 = await uiConfirm("请再次确认：还有 "+blank+" 道题未答，提交后无法修改。是否确认提交？","确认提交",true);
+      if(!ok2)return;
+    }
+  }finally{submitting=false;}
 
   var correct=0, wrong=0;
   var details=[];
@@ -594,26 +670,35 @@ function renderResult(repeatView){
 }
 
 /* ================= 教师预览：重新作答 ================= */
-$("btn-teacher-retake").onclick=function(){
-  if(!currentRec||currentRec.role!=="teacher"){window.alert("该功能仅教师测试号可用。");return;}
+$("btn-teacher-retake").onclick=async function(){
+  if(!currentRec||currentRec.role!=="teacher"){await uiAlert("该功能仅教师测试号可用。");return;}
+  var ok=await uiConfirm("确定清空本次预览作答并重新开始一套新试卷吗？","重新作答");
+  if(!ok)return;
   var all=loadAll();delete all[currentSid];saveAll(all);
   currentRec={name:TEACHER_ACCOUNT.name,startTs:Date.now(),answers:{},done:false,role:"teacher"};
   putRec(currentSid,currentRec);
   renderExam(false);
 };
 
+/* 软重置：回到干净登录页（不调用 location.reload，避免内嵌预览刷新宿主） */
+function softReset(){
+  clearInterval(timerHandle);
+  currentSid=null;currentRec=null;
+  $("in-id").value="";$("in-name").value="";$("login-err").textContent="";
+  show("view-login");
+}
+
 /* ================= 教师管理 ================= */
-$("teacher-link").onclick=function(){
-  var pin=window.prompt("请输入教师管理口令：");
+$("teacher-link").onclick=async function(){
+  var pin=await uiPrompt("请输入教师管理口令：");
   if(pin===null)return;
-  if(pin!==TEACHER_PIN){window.alert("口令不正确。");return;}
+  if(pin!==TEACHER_PIN){await uiAlert("口令不正确。");return;}
   var n=Object.keys(loadAll()).length;
-  if(window.confirm("当前本机共有 "+n+" 条考试记录。\n确定清除全部作答记录（所有学生将可重新考试）吗？")){
-    localStorage.removeItem(STORE_KEY);
-    currentSid=null;currentRec=null;
-    window.alert("已清除全部记录。");
-    location.reload();
-  }
+  var ok=await uiConfirm("当前本机共有 "+n+" 条考试记录。\n确定清除全部作答记录（所有学生将可重新考试）吗？","清除全部记录",true);
+  if(!ok)return;
+  localStorage.removeItem(STORE_KEY);
+  softReset();
+  await uiAlert("已清除全部记录。");
 };
 </script>
 </body>
