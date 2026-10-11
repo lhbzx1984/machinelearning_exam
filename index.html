@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据分析与机器学习 · 基本概念测试</title>
+<style>
+  :root{
+    --primary:#1e4e8c;
+    --primary-dark:#163a68;
+    --accent:#2563eb;
+    --bg:#eef2f7;
+    --card:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --green:#16a34a;
+    --red:#dc2626;
+    --amber:#d97706;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Segoe UI",Arial,sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px;}
+  .card{background:var(--card);border-radius:14px;box-shadow:0 6px 24px rgba(30,78,140,.08);padding:32px;margin-bottom:20px;}
+  /* 顶部标题 */
+  .masthead{text-align:center;padding:36px 24px 28px;
+    background:linear-gradient(135deg,#1e4e8c 0%,#2b6cb0 100%);
+    color:#fff;border-radius:14px;margin-bottom:22px;box-shadow:0 8px 24px rgba(30,78,140,.25);}
+  .masthead .school{font-size:15px;letter-spacing:2px;opacity:.9;}
+  .masthead h1{font-size:27px;margin:10px 0 6px;font-weight:700;}
+  .masthead .sub{font-size:14px;opacity:.85;}
+  /* 说明条目 */
+  .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:20px 0 8px;}
+  .info-item{background:#f4f8fd;border:1px solid #dbeafe;border-radius:10px;padding:12px 14px;font-size:14px;}
+  .info-item b{color:var(--primary);display:block;font-size:15px;margin-bottom:2px;}
+  .notice{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:12px 16px;font-size:14px;margin-top:16px;}
+  /* 表单 */
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-weight:600;margin-bottom:6px;font-size:15px;}
+  .field input{width:100%;padding:12px 14px;font-size:16px;border:1.5px solid #cbd5e1;border-radius:9px;outline:none;transition:border-color .15s;}
+  .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+  .btn{display:inline-block;border:none;cursor:pointer;font-size:16px;font-weight:600;
+    padding:13px 30px;border-radius:9px;background:var(--accent);color:#fff;transition:background .15s,transform .05s;}
+  .btn:hover{background:#1d4ed8;}
+  .btn:active{transform:translateY(1px);}
+  .btn.block{width:100%;}
+  .btn.ghost{background:#fff;color:var(--accent);border:1.5px solid var(--accent);}
+  .btn.ghost:hover{background:#eff6ff;}
+  .err-msg{color:var(--red);font-size:14px;margin-top:10px;min-height:20px;font-weight:600;}
+  /* 考试顶栏 */
+  .exam-bar{position:sticky;top:0;z-index:50;background:#fff;border-radius:12px;
+    box-shadow:0 4px 16px rgba(30,78,140,.12);padding:12px 18px;margin-bottom:18px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .exam-bar .who{font-weight:700;color:var(--primary);font-size:15px;}
+  .exam-bar .meta{font-size:13.5px;color:var(--muted);}
+  .prog-pill{margin-left:auto;background:#eff6ff;color:var(--primary);font-weight:700;
+    border-radius:999px;padding:5px 14px;font-size:14px;white-space:nowrap;}
+  .timer-pill{font-variant-numeric:tabular-nums;background:#f3f4f6;border-radius:999px;padding:5px 12px;font-size:14px;color:#374151;}
+  .btn.small{padding:9px 22px;font-size:14.5px;}
+  /* 题目 */
+  .q-card{background:#fff;border-radius:12px;padding:22px 24px;margin-bottom:14px;
+    box-shadow:0 2px 10px rgba(30,78,140,.06);border:1px solid var(--line);}
+  .q-head{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;}
+  .q-no{flex:none;background:var(--primary);color:#fff;font-weight:700;font-size:13.5px;
+    min-width:30px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-top:3px;}
+  .q-text{font-size:15.5px;font-weight:600;}
+  .tag{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;vertical-align:2px;margin-left:6px;}
+  .tag.single{background:#dbeafe;color:#1d4ed8;}
+  .tag.multi{background:#fef3c7;color:#b45309;}
+  .opt{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:9px;cursor:pointer;
+    border:1.5px solid transparent;font-size:15px;transition:background .12s;}
+  .opt:hover{background:#f6f9ff;}
+  .opt input{margin-top:5px;width:17px;height:17px;flex:none;accent-color:var(--accent);cursor:pointer;}
+  .opt.selected{background:#eff6ff;border-color:#bfdbfe;}
+  .opt .letter{font-weight:700;color:var(--primary);flex:none;}
+  /* 成绩页 */
+  .done-banner{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:12px 16px;font-size:14.5px;font-weight:600;margin-bottom:18px;}
+  .score-card{border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(30,78,140,.18);margin-bottom:22px;}
+  .score-top{background:linear-gradient(135deg,#1e4e8c,#2b6cb0);color:#fff;padding:26px 30px 22px;text-align:center;}
+  .score-top .school{font-size:13.5px;letter-spacing:2px;opacity:.9;}
+  .score-top h2{font-size:21px;margin:8px 0 2px;}
+  .score-top .course{font-size:13.5px;opacity:.85;}
+  .score-body{background:#fff;padding:26px 30px 28px;text-align:center;}
+  .stu-line{font-size:17px;margin-bottom:14px;}
+  .stu-line b{font-size:19px;color:var(--primary);}
+  .big-score{font-size:64px;font-weight:800;color:var(--primary);line-height:1.1;}
+  .big-score small{font-size:24px;color:var(--muted);font-weight:600;}
+  .score-grade{display:inline-block;margin:6px 0 4px;font-size:15px;font-weight:700;padding:4px 18px;border-radius:999px;}
+  .g-pass{background:#dcfce7;color:#166534;}
+  .g-fail{background:#fee2e2;color:#991b1b;}
+  .stat-row{display:flex;justify-content:center;gap:0;margin:18px auto 8px;flex-wrap:wrap;}
+  .stat{padding:0 22px;border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .v{font-size:22px;font-weight:800;}
+  .stat .v.green{color:var(--green);} .stat .v.red{color:var(--red);} .stat .v.amber{color:var(--amber);}
+  .stat .k{font-size:13px;color:var(--muted);}
+  .submit-info{font-size:13.5px;color:var(--muted);margin-top:10px;}
+  .shot-tip{margin-top:18px;background:#eff6ff;border:1px dashed #93c5fd;color:#1e40af;border-radius:10px;padding:12px 16px;font-size:14.5px;font-weight:600;}
+  /* 详情 */
+  details.review{background:#fff;border-radius:12px;border:1px solid var(--line);padding:0;}
+  details.review summary{cursor:pointer;padding:15px 22px;font-weight:700;color:var(--primary);font-size:15px;list-style:none;}
+  details.review summary::before{content:"▸ ";}
+  details.review[open] summary::before{content:"▾ ";}
+  .review-body{padding:4px 22px 20px;}
+  .rv{padding:11px 0;border-bottom:1px dashed var(--line);font-size:14px;}
+  .rv:last-child{border-bottom:none;}
+  .rv .rv-q{font-weight:600;margin-bottom:3px;}
+  .rv .mark{font-weight:800;margin-right:6px;}
+  .rv .ok .mark{color:var(--green);} .rv .bad .mark{color:var(--red);}
+  .rv .ans-line{color:#374151;}
+  .rv .ans-line .truth{color:var(--green);font-weight:700;}
+  .rv .ans-line .mine{font-weight:700;}
+  /* 教师测试入口 */
+  .test-entry{margin-top:20px;max-width:460px;border-top:1px dashed var(--line);padding-top:14px;}
+  .test-entry summary{cursor:pointer;font-size:13.5px;color:var(--muted);font-weight:600;list-style:none;}
+  .test-entry summary::before{content:"▸ ";}
+  .test-entry[open] summary::before{content:"▾ ";}
+  .test-entry-body{margin-top:10px;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:13.5px;}
+  .test-entry-body p{margin:4px 0;}
+  .test-entry-body code{background:#eef2ff;padding:1px 8px;border-radius:5px;font-size:13.5px;color:var(--primary);font-weight:700;}
+  .test-btns{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 8px;}
+  .test-note{color:var(--muted);font-size:12.5px;}
+  /* 页脚 */
+  footer{text-align:center;color:#9ca3af;font-size:12.5px;margin-top:26px;}
+  footer a{color:#9ca3af;text-decoration:none;cursor:pointer;}
+  footer a:hover{color:var(--muted);}
+  @media (max-width:600px){
+    .card{padding:22px 18px;}
+    .masthead h1{font-size:21px;}
+    .q-card{padding:18px 16px;}
+    .big-score{font-size:52px;}
+    .stat{padding:0 14px;}
+  }
+  @media print{
+    body{background:#fff;}
+    .no-print{display:none !important;}
+    .score-card{box-shadow:none;border:1px solid #ccc;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="masthead">
+    <div class="school">天津仁爱学院</div>
+    <h1>数据分析与机器学习 · 基本概念测试</h1>
+    <div class="sub">教学班：数据分析与机器学习-0001　|　任课教师：刘海斌</div>
+  </div>
+
+  <!-- 登录页 -->
+  <section id="view-login" class="card">
+    <h2 style="font-size:19px;margin-bottom:6px;">身份核对</h2>
+    <p style="color:var(--muted);font-size:14px;">请输入与教学名单一致的学号和姓名，核对通过后方可开始答题。</p>
+    <div class="info-grid">
+      <div class="info-item"><b>试卷构成</b>共 50 道选择题（含单选与多选）</div>
+      <div class="info-item"><b>分值设置</b>每题 2 分，满分 100 分</div>
+      <div class="info-item"><b>答题机会</b>每个学号仅有 1 次机会</div>
+      <div class="info-item"><b>成绩呈现</b>提交后立即显示成绩，请截图发老师</div>
+    </div>
+    <div class="notice">
+      注意：多选题少选、多选、错选均不得分；答题过程中请勿刷新或关闭页面（已作答内容会自动保存，意外刷新后重新输入学号姓名可继续）。<b>一旦提交将不能再次作答。</b>
+    </div>
+    <div style="margin-top:22px;max-width:420px;">
+      <div class="field">
+        <label for="in-id">学号</label>
+        <input id="in-id" type="text" inputmode="numeric" autocomplete="off" placeholder="请输入学号">
+      </div>
+      <div class="field">
+        <label for="in-name">姓名</label>
+        <input id="in-name" type="text" autocomplete="off" placeholder="请输入姓名">
+      </div>
+      <button class="btn block" id="btn-login">核对身份并开始考试</button>
+      <div class="err-msg" id="login-err"></div>
+    </div>
+    <details class="test-entry">
+      <summary>教师测试入口（仅教师使用，学生请勿使用）</summary>
+      <div class="test-entry-body">
+        <p><b>① 教师测试号</b>——可反复作答、随时检查题目与正确答案，成绩不计入正式记录：</p>
+        <p>学号：<code>0000</code>　姓名：<code>教师预览</code></p>
+        <p style="margin-top:8px;"><b>② 学生测试号</b>——完全模拟真实学生流程（仅一次机会、提交即锁定）：</p>
+        <p>学号：<code>9999999999</code>　姓名：<code>测试学生</code></p>
+        <div class="test-btns">
+          <button type="button" class="btn ghost small" id="fill-teacher">一键填入教师测试号</button>
+          <button type="button" class="btn ghost small" id="fill-teststu">一键填入学生测试号</button>
+        </div>
+        <p class="test-note">提示：学生测试号提交锁定后，可在页面底部"教师管理"（口令 lhb2026）中清除记录，即可重新使用。</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- 考试页 -->
+  <section id="view-exam" style="display:none;">
+    <div class="exam-bar">
+      <span class="who" id="exam-who"></span>
+      <span id="exam-mode" style="display:none;color:#b45309;font-weight:700;font-size:13.5px;">● 教师预览模式（成绩不计入）</span>
+      <span class="timer-pill" id="exam-timer">00:00</span>
+      <span class="prog-pill" id="exam-prog">已答 0 / 50</span>
+      <button class="btn small" id="btn-submit">提交试卷</button>
+    </div>
+    <div id="q-list"></div>
+    <div style="text-align:center;margin:8px 0 0;">
+      <button class="btn" id="btn-submit2">提交试卷并查看成绩</button>
+    </div>
+  </section>
+
+  <!-- 成绩页 -->
+  <section id="view-result" style="display:none;">
+    <div class="done-banner" id="done-banner" style="display:none;"></div>
+    <div class="score-card">
+      <div class="score-top">
+        <div class="school">天津仁爱学院</div>
+        <h2>机器学习基本概念测试 · 成绩单</h2>
+        <div class="course">数据分析与机器学习-0001　任课教师：刘海斌</div>
+      </div>
+      <div class="score-body">
+        <div class="stu-line">学号：<b id="r-id"></b>　　姓名：<b id="r-name"></b></div>
+        <div class="big-score"><span id="r-score">0</span><small> / 100</small></div>
+        <div class="score-grade g-pass" id="r-grade"></div>
+        <div class="stat-row">
+          <div class="stat"><div class="v green" id="r-correct">0</div><div class="k">答对题数</div></div>
+          <div class="stat"><div class="v red" id="r-wrong">0</div><div class="k">答错题数</div></div>
+          <div class="stat"><div class="v amber" id="r-blank">0</div><div class="k">未答题数</div></div>
+          <div class="stat"><div class="v" id="r-rate">0%</div><div class="k">正确率</div></div>
+          <div class="stat"><div class="v" id="r-duration">0分0秒</div><div class="k">答题用时</div></div>
+        </div>
+        <div class="submit-info" id="r-time"></div>
+        <div class="shot-tip" id="shot-tip">请将本成绩单截图发送给任课教师（刘海斌老师），谢谢配合！</div>
+      </div>
+    </div>
+    <div id="result-actions" class="no-print" style="text-align:center;margin:0 0 16px;display:none;">
+      <button class="btn ghost" id="btn-teacher-retake">重新预览作答（仅教师测试号）</button>
+    </div>
+    <details class="review no-print" id="review-box">
+      <summary>查看答题详情（仅供核对，成绩以截图为准）</summary>
+      <div class="review-body" id="review-body"></div>
+    </details>
+  </section>
+
+  <footer class="no-print">
+    本测试在当前浏览器记录答题情况，提交前请确认设备正常&nbsp;&nbsp;|&nbsp;&nbsp;<a id="teacher-link">教师管理</a>
+  </footer>
+</div>
+
+<script>
+/* ================= 学生名单（来源：jsdmcdy.xlsx，共59人） ================= */
+var STUDENTS = [
+{"id":"6023014049","name":"杨子杰"},{"id":"6024209194","name":"孙健彰"},{"id":"6024209208","name":"王天依"},
+{"id":"6024209209","name":"曹轩峰"},{"id":"6024209226","name":"谭仔珩"},{"id":"6024209230","name":"赵嘉一"},
+{"id":"6024209270","name":"郝新然"},{"id":"6024209279","name":"高奥"},{"id":"6024209299","name":"魏乾乾"},
+{"id":"6024209302","name":"李祥龙"},{"id":"6024209310","name":"蔡一凡"},{"id":"6024209339","name":"丁钰"},
+{"id":"6024209342","name":"黄羽轩"},{"id":"6024209368","name":"周冰怡"},{"id":"6024209369","name":"冯柯杰"},
+{"id":"6024209371","name":"林珂仪"},{"id":"6024209380","name":"贾梦晴"},{"id":"6024209384","name":"王默妍"},
+{"id":"6024209386","name":"魏羽翔"},{"id":"6024209388","name":"郭硕硕"},{"id":"6024209391","name":"许若晨"},
+{"id":"6024209392","name":"刘欣雨"},{"id":"6024209394","name":"朱子琰"},{"id":"6024209396","name":"张力元"},
+{"id":"6024209399","name":"张企乐"},{"id":"6024209401","name":"宋蕙孜"},{"id":"6024209403","name":"高哲"},
+{"id":"6024209434","name":"彭佳韵"},{"id":"6024209435","name":"王熙嘉"},{"id":"6024209438","name":"杨荣"},
+{"id":"6024209440","name":"温泽鹏"},{"id":"6024209444","name":"王致力"},{"id":"6024209207","name":"娄寓泉"},
+{"id":"6024209225","name":"仇妙妍"},{"id":"6024209227","name":"侯悦强"},{"id":"6024209228","name":"丁清颖"},
+{"id":"6024209229","name":"徐佳豪"},{"id":"6024209256","name":"刘子睿"},{"id":"6024209276","name":"潘子轩"},
+{"id":"6024209296","name":"刘美煊"},{"id":"6024209301","name":"秦明月"},{"id":"6024209341","name":"钟雨芩"},
+{"id":"6024209362","name":"姜瓯娇"},{"id":"6024209370","name":"郑皓"},{"id":"6024209372","name":"刘欣蕊"},
+{"id":"6024209373","name":"刘明轩"},{"id":"6024209385","name":"檀婷艳"},{"id":"6024209389","name":"沈名文"},
+{"id":"6024209395","name":"张琪珮"},{"id":"6024209397","name":"代潇柯"},{"id":"6024209398","name":"曹向宇"},
+{"id":"6024209400","name":"李舒萌"},{"id":"6024209404","name":"张天祥"},{"id":"6024209405","name":"魏小茜"},
+{"id":"6024209436","name":"邱婉珏"},{"id":"6024209437","name":"周梓健"},{"id":"6024209439","name":"马宇璇"},
+{"id":"6024209441","name":"吴景浩"},{"id":"6024209443","name":"唐甜"}
+];
+
+/* ================= 题库（依据课程11个课件，中档难度） =================
+   q:题干  m:是否多选  o:四个选项（依次对应A/B/C/D） */
+var QUESTIONS = [
+{q:"机器学习方法的三要素是（　）。",m:false,o:["数据、特征、模型","模型、策略、算法","训练、验证、测试","输入、处理、输出"]},
+{q:"下列属于有监督学习典型任务的有（　）。",m:true,o:["分类","回归","聚类","降维"]},
+{q:"从未标注的训练数据集中，根据样本间的统计规律对样本进行分析（如聚类、降维），这种学习方式属于（　）。",m:false,o:["有监督学习","无监督学习","半监督学习","强化学习"]},
+{q:"半监督学习依赖的两个基本假设是（　）。",m:true,o:["聚类假设","流形假设","独立性假设","正态性假设"]},
+{q:"关于强化学习，下列说法正确的是（　）。",m:false,o:["每条训练数据都必须带有正确标签","外部环境对输出只给出评价信息（奖励或惩罚）而非正确答案","其典型任务是对无标签数据聚类","学习过程中不需要与外部环境交互"]},
+{q:"由输入空间到输出空间的映射的集合，称为（　）。",m:false,o:["特征空间","假设空间","输出空间","样本空间"]},
+{q:"下列损失函数与其常见应用算法对应正确的有（　）。",m:true,o:["平方损失 —— 线性回归","Log损失 —— 逻辑回归","指数损失 —— AdaBoost","合页（Hinge）损失 —— 支持向量机"]},
+{q:"关于经验风险与期望风险，下列说法错误的是（　）。",m:false,o:["期望风险是模型对所有数据集的全局效果","经验风险是模型对训练集的局部效果","联合分布P(X,Y)已知，期望风险通常可以直接精确计算","训练集足够大时可用经验风险近似替代期望风险"]},
+{q:"在经验风险的基础上增加正则化项（惩罚项）以防止过拟合，这样得到的风险称为（　）。",m:false,o:["期望风险","结构风险","0-1风险","条件风险"]},
+{q:"下列范数中，容易使模型参数变得稀疏（许多参数为0）的是（　）。",m:false,o:["L1范数","L2范数","Frobenius范数","核范数"]},
+{q:"常用的特征选择方法包括（　）。",m:true,o:["过滤法（Filter）","包裹法（Wrapper）","嵌入法（Embedded）","随机删除法"]},
+{q:"下列属于机器学习常用模型评估方法的有（　）。",m:true,o:["留出法","k折交叉验证法","留一法","自助法"]},
+{q:"采用有放回的自助采样n次，某一条样本始终未被抽中的概率约为（　）。",m:false,o:["0.250","0.368","0.500","0.632"]},
+{q:"关于偏差、方差与噪声，下列说法正确的是（　）。",m:false,o:["偏差度量模型的稳定性，方差度量模型的拟合能力","噪声可以通过增加训练次数彻底消除","噪声表达了期望泛化误差的下界，通常不可去除","模型越复杂，方差一定越小"]},
+{q:"关于ROC曲线与AUC，下列说法正确的是（　）。",m:false,o:["ROC曲线以TPR为横坐标、FPR为纵坐标","ROC曲线以FPR为横坐标、TPR为纵坐标，AUC越大模型泛化能力越强","AUC是P-R曲线下的面积","AUC越小说明分类模型越好"]},
+{q:"回归分析所研究的变量之间的关系是（　）。",m:false,o:["确定的函数关系，一个变量唯一确定另一个变量","非确定性的相互依赖关系，通过一定的概率分布来描述","变量之间不存在任何关系","必须是线性的一一对应关系"]},
+{q:"最小二乘估计是寻找使（　）达到极小的回归参数。",m:false,o:["观测值与回归预测值的离差平方和","观测值与预测值离差的绝对值之和","所有预测值之和","所有回归系数之和"]},
+{q:"线性回归模型的基本前置假设包括（　）。",m:true,o:["随机误差项零均值","随机误差项同方差","随机误差项之间无自相关","随机误差项服从正态分布"]},
+{q:"逻辑回归（Logistic Regression）主要用于解决（　）。",m:false,o:["二分类问题","聚类问题","降维问题","关联规则挖掘问题"]},
+{q:"由于因变量服从二项分布而非正态分布，逻辑回归的参数估计通常采用（　）。",m:false,o:["最小二乘法","最大似然法","矩估计法","移动平均法"]},
+{q:"逻辑回归使用的Sigmoid函数，其输出值范围是（　）。",m:false,o:["[-1, 1]","[0, 1]","(-∞, +∞)","[0, +∞)"]},
+{q:"k近邻（kNN）算法在训练阶段只保存样本，收到测试样本后才进行计算，它被称为（　）。",m:false,o:["急切学习（eager learning）","惰性学习（lazy learning）","强化学习","主动学习"]},
+{q:"k近邻法的三要素是（　）。",m:true,o:["k值选择","距离度量","分类决策规则","学习率"]},
+{q:"在k近邻中，若k值选择过小，通常会导致（　）。",m:false,o:["模型过于简单，发生欠拟合","模型整体变复杂，容易发生过拟合","预测的方差减小","计算量变为零"]},
+{q:"在Lp距离度量中，p=2时对应的距离是（　）。",m:false,o:["曼哈顿距离","欧氏距离","各维度距离中的最大值","汉明距离"]},
+{q:"使用kNN前常常需要对特征做归一化，其主要原因是（　）。",m:false,o:["不同特征量纲差异会使数值大的特征在距离计算中占据主导地位","归一化可以减少特征的数量","归一化能把文本标签变成数值","归一化可以消除数据中的所有噪声"]},
+{q:"决策树学习通常包含的三要素是（　）。",m:true,o:["特征选择","决策树的生成","决策树的剪枝","人工数据标注"]},
+{q:"在决策树的树形结构中，叶子结点表示的是（　）。",m:false,o:["一个特征（属性）","一个分类（类别）","一条划分规则","一种距离度量"]},
+{q:"ID3算法和C4.5算法用于特征选择的主要指标分别是（　）。",m:false,o:["信息增益、信息增益比","信息增益比、信息增益","基尼指数、信息增益","信息增益、基尼指数"]},
+{q:"关于决策树的生成与剪枝，下列说法正确的是（　）。",m:false,o:["生成考虑全局最优，剪枝只考虑局部最优","生成对应局部最优，剪枝考虑全局最优","生成和剪枝都只考虑局部最优","剪枝的目的是加重模型的过拟合"]},
+{q:"已知检测结果为阳性，想据此推断患病的概率 P(患病|阳性)，这种“执果寻因”所使用的公式及所求概率分别是（　）。",m:false,o:["全概率公式，先验概率","贝叶斯公式，后验概率","乘法公式，似然函数","条件概率定义，联合概率"]},
+{q:"朴素贝叶斯中“朴素（Naive）”一词的含义是（　）。",m:false,o:["算法完全不使用概率知识","假设给定目标值时各个属性之间相互条件独立","假设所有特征的取值都相同","假设训练样本的数量必须很少"]},
+{q:"朴素贝叶斯分类时，若某属性取值在训练样本中从未出现导致条件概率为0，常用的解决办法是（　）。",m:false,o:["放弃该样本不进行分类","进行拉普拉斯平滑","强制把该概率改为1","删除该样本的所有特征"]},
+{q:"最大后验估计（MAP）与最大似然估计（MLE）相比，最大的不同是（　）。",m:false,o:["MAP不需要任何观测数据","MAP融入了待估计量的先验分布","MLE在估计时使用了先验概率","二者在任何情况下都完全等价"]},
+{q:"Minsky等学者指出单层感知机的主要局限是（　）。",m:false,o:["计算速度过快","只能处理线性问题，无法解决异或（XOR）等非线性问题","不能处理数值型输入","无法完成二分类任务"]},
+{q:"在神经网络的神经元线性叠加之后加入激活函数，其主要作用是（　）。",m:false,o:["为网络引入非线性因素，增强表达能力","减少输入特征的数量","保证所有输出都为负数","替代损失函数"]},
+{q:"关于Sigmoid激活函数，下列说法正确的有（　）。",m:true,o:["输出范围为[0,1]，可在输出层表示概率值","函数连续可导，便于求导","两端过于平坦，在深层网络中容易出现梯度消失","其收敛速度通常比ReLU更快"]},
+{q:"与Sigmoid、Tanh相比，ReLU激活函数的主要优点是（　）。",m:false,o:["收敛速度更快、计算高效，且没有梯度饱和问题","输出恒为负值","能把数据压缩到[-1,1]区间","在任何情况下都不会出现“死亡神经元”"]},
+{q:"BP（反向传播）神经网络的训练过程是（　）。",m:false,o:["信号反向传播、误差正向传递","输入信号逐层前传产生输出，再将误差反向传播、逐层调整连接权值","只调整输入层的参数","随机调整权重，与误差大小无关"]},
+{q:"关于学习率，下列说法正确的是（　）。",m:false,o:["学习率越小越好，且收敛总是越快","学习率越大越好，可以一步到达最优值","过小则收敛缓慢甚至无法收敛，过大则可能使训练振荡、越过最小值而无法收敛","学习率的大小与模型训练效果没有关系"]},
+{q:"课件中列出的常用防止过拟合的方法有（　）。",m:true,o:["参数范数惩罚（正则化）","提前终止（Early Stopping）","Dropout","数据增强"]},
+{q:"支持向量机（SVM）的决策边界是（　）。",m:false,o:["使训练误差为零的任意曲线","对学习样本求解得到的最大边距超平面","经过每一个训练样本的平面","距离坐标原点最近的平面"]},
+{q:"关于硬间隔与软间隔，下列说法正确的是（　）。",m:false,o:["硬间隔允许一定量的样本分类错误","软间隔允许一定量的样本分类错误","软间隔要求所有样本完全分类准确","二者都不允许存在任何分类错误"]},
+{q:"当样本在原始空间线性不可分时，SVM引入核函数的目的是（　）。",m:false,o:["直接删除难以分类的样本","将样本映射到更高维特征空间使其线性可分，并用核函数替代内积计算","把特征个数减少到1个","给样本随机重新打标签"]},
+{q:"支持向量机常用、对判定边界附近样本惩罚力度较高的损失函数是（　）。",m:false,o:["0-1损失","平方损失","合页（Hinge）损失","绝对值损失"]},
+{q:"关于Bagging集成方法，下列描述正确的是（　）。",m:false,o:["基模型必须严格串行训练，后一个依赖前一个","从训练集有放回子抽样构建各基模型的子训练集，再对预测结果进行投票或平均","每轮都提高前一个模型分错样本的权重","集成中只能使用一个基模型"]},
+{q:"AdaBoost算法的“自适应”主要体现在（　）。",m:false,o:["前一个基分类器分错的样本权重被提高，加权后的样本再用于训练下一个分类器","自动删除所有被分错的样本","各基分类器之间完全独立、互不影响","每一轮都将训练集规模减半"]},
+{q:"随机森林在以决策树为基学习器构建Bagging集成的基础上进一步引入了随机性，其组成部分包括（　）。",m:true,o:["随机选择样本（Bootstrap放回抽样）","在节点分裂时随机选择特征","构建多棵决策树","各树结果进行投票（平均）"]},
+{q:"关于GBDT，下列说法正确的是（　）。",m:false,o:["其中的树主要是分类树而不是回归树","它属于Bagging策略，各棵树可以完全并行训练","它属于Boosting策略，基学习器是回归树，并以损失函数负梯度作为残差的近似来拟合","最终结果只取第一棵树的输出"]},
+{q:"相比XGBoost，LightGBM的主要改进包括（　）。",m:true,o:["基于梯度的单边采样（GOSS）","互斥特征捆绑（EFB）","直方图算法（Histogram）","基于最大深度限制的Leaf-wise生长策略"]}
+];
+
+/* 正确答案（经字母位移+4的简单处理，解码时减4；仅为避免直接查看源代码得答案） */
+var ANS_ENC = ["F","EF","F","EF","F","F","EFGH","G","F","E","EFG","EFGH","F","G","F",
+"F","E","EFGH","E","F","F","F","EFG","F","F","E","EFG","F","E","F",
+"F","F","F","F","F","E","EFG","E","F","G","EFGH","F","F","F","G","F","E","EFGH","G","EFGH"];
+function decodeAns(c){return String.fromCharCode((c.charCodeAt(0)-65-4+26)%26+65);}
+function truthAns(i){return ANS_ENC[i].split("").map(decodeAns).sort().join("");}
+
+/* ================= 存储与状态 ================= */
+var STORE_KEY = "ml_quiz_records_v1_2026";
+/* 教师管理口令（如需更改，直接修改下面引号中的内容即可） */
+var TEACHER_PIN = "lhb2026";
+/* 固定测试账号（不在正式名单内，可长期复用） */
+var TEACHER_ACCOUNT = {id:"0000", name:"教师预览"};            /* 教师测试号：可反复作答，成绩不计入正式记录 */
+var TEST_STUDENT_ACCOUNT = {id:"9999999999", name:"测试学生"}; /* 学生测试号：规则与真实学生完全一致，仅一次机会 */
+
+var currentSid = null;
+var currentRec = null;
+var timerHandle = null;
+
+function loadAll(){
+  try{return JSON.parse(localStorage.getItem(STORE_KEY))||{};}catch(e){return {};}
+}
+function saveAll(o){localStorage.setItem(STORE_KEY, JSON.stringify(o));}
+function getRec(sid){return loadAll()[sid]||null;}
+function putRec(sid,rec){var all=loadAll();all[sid]=rec;saveAll(all);}
+
+function $(id){return document.getElementById(id);}
+function show(v){
+  ["view-login","view-exam","view-result"].forEach(function(x){$(x).style.display=(x===v?"block":"none");});
+  window.scrollTo(0,0);
+}
+
+/* ================= 登录 ================= */
+$("btn-login").onclick = function(){
+  var sid = $("in-id").value.replace(/\s+/g,"");
+  var name = $("in-name").value.trim();
+  var err = $("login-err");
+  err.textContent = "";
+  if(!sid||!name){err.textContent="请输入学号和姓名。";return;}
+  var stu = null;
+  for(var i=0;i<STUDENTS.length;i++){if(STUDENTS[i].id===sid){stu=STUDENTS[i];break;}}
+  var isTeacher = (sid===TEACHER_ACCOUNT.id && name===TEACHER_ACCOUNT.name);
+  var isTestStu = (sid===TEST_STUDENT_ACCOUNT.id && name===TEST_STUDENT_ACCOUNT.name);
+  /* 不区分具体错误类型，避免冒名试探 */
+  if(!stu && !isTeacher && !isTestStu){err.textContent="学号或姓名与名单不一致，请核对后重新输入。";return;}
+  if(stu && stu.name!==name){err.textContent="学号或姓名与名单不一致，请核对后重新输入。";return;}
+
+  currentSid = sid;
+
+  /* 教师测试号：每次进入都重新开始，可无限次预览，成绩单标注"不计入正式成绩" */
+  if(isTeacher){
+    currentRec = {name:name, startTs:Date.now(), answers:{}, done:false, role:"teacher"};
+    putRec(sid,currentRec);
+    renderExam(false);
+    return;
+  }
+
+  /* 学生测试号与真实学生走完全相同的一次性流程 */
+  var rec = getRec(sid);
+  if(rec&&rec.done){
+    currentRec = rec;
+    renderResult(true);
+    return;
+  }
+  if(!rec){
+    rec = {name:name, startTs:Date.now(), answers:{}, done:false, role:isTestStu?"test":"student"};
+    putRec(sid,rec);
+  }else{
+    rec.name = name;
+    putRec(sid,rec);
+  }
+  currentRec = rec;
+  renderExam(false);
+};
+
+/* 登录页一键填入测试账号 */
+$("fill-teacher").onclick=function(){
+  $("in-id").value=TEACHER_ACCOUNT.id;$("in-name").value=TEACHER_ACCOUNT.name;$("login-err").textContent="";
+};
+$("fill-teststu").onclick=function(){
+  $("in-id").value=TEST_STUDENT_ACCOUNT.id;$("in-name").value=TEST_STUDENT_ACCOUNT.name;$("login-err").textContent="";
+};
+
+/* ================= 考试页 ================= */
+function fmtTime(sec){
+  var h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;
+  function p(x){return (x<10?"0":"")+x;}
+  return (h>0?p(h)+":":"")+p(m)+":"+p(s);
+}
+function fmtDuration(sec){
+  var m=Math.floor(sec/60),s=sec%60;return m+"分"+s+"秒";
+}
+
+function renderExam(resumed){
+  show("view-exam");
+  $("exam-who").textContent = currentRec.name+"　"+currentSid;
+  $("exam-mode").style.display = (currentRec.role==="teacher") ? "inline" : "none";
+  var list = $("q-list");
+  list.innerHTML = "";
+  var letters = ["A","B","C","D"];
+  QUESTIONS.forEach(function(q,qi){
+    var card = document.createElement("div");
+    card.className = "q-card";
+    var head = '<div class="q-head"><span class="q-no">'+(qi+1)+'</span><div class="q-text">'+q.q+
+      '<span class="tag '+(q.m?"multi":"single")+'">'+(q.m?"多选":"单选")+'</span></div></div>';
+    var optsHtml = "";
+    for(var oi=0;oi<q.o.length;oi++){
+      var L=letters[oi];
+      var itype = q.m?"checkbox":"radio";
+      optsHtml += '<label class="opt" data-q="'+qi+'" data-l="'+L+'">'+
+        '<input type="'+itype+'" name="q'+qi+'" value="'+L+'">'+
+        '<span class="letter">'+L+'.</span><span>'+q.o[oi]+'</span></label>';
+    }
+    card.innerHTML = head + optsHtml;
+    list.appendChild(card);
+  });
+
+  /* 恢复已答 */
+  Object.keys(currentRec.answers).forEach(function(k){
+    var ansStr = currentRec.answers[k]||"";
+    ansStr.split("").forEach(function(L){
+      var inp = document.querySelector('input[name="q'+k+'"][value="'+L+'"]');
+      if(inp){inp.checked=true;inpHook(inp);}
+    });
+  });
+
+  list.addEventListener("change",onAnswer,true);
+  updateProg();
+
+  if(resumed){
+    var bar=document.createElement("div");
+    bar.className="done-banner";
+    bar.style.background="#eff6ff";bar.style.borderColor="#bfdbfe";bar.style.color="#1e40af";
+    bar.textContent="已恢复你上次未完成的答题，已作答内容已保留，请继续。";
+    list.parentNode.insertBefore(bar,list);
+  }
+
+  clearInterval(timerHandle);
+  timerHandle = setInterval(function(){
+    $("exam-timer").textContent = fmtTime(Math.floor((Date.now()-currentRec.startTs)/1000));
+  },1000);
+  $("exam-timer").textContent = fmtTime(Math.floor((Date.now()-currentRec.startTs)/1000));
+}
+
+function inpHook(inp){
+  var lab = inp.closest(".opt");
+  if(lab) lab.classList.toggle("selected", inp.checked);
+}
+function onAnswer(e){
+  var inp = e.target;
+  if(inp.type!=="radio"&&inp.type!=="checkbox")return;
+  var name = inp.name;
+  var qi = parseInt(name.substring(1),10);
+  var q = QUESTIONS[qi];
+  var checked = Array.prototype.slice.call(document.getElementsByName(name)).filter(function(x){return x.checked;});
+  if(!q.m && checked.length>1){/* radio不会出现，保险 */}
+  var val = checked.map(function(x){return x.value;}).sort().join("");
+  if(val){currentRec.answers[qi]=val;}else{delete currentRec.answers[qi];}
+  putRec(currentSid,currentRec);
+  document.querySelectorAll('label.opt[data-q="'+qi+'"]').forEach(function(lab){
+    var cb=lab.querySelector("input");
+    lab.classList.toggle("selected",cb.checked);
+  });
+  updateProg();
+}
+function updateProg(){
+  var n = Object.keys(currentRec.answers).filter(function(k){return currentRec.answers[k];}).length;
+  $("exam-prog").textContent = "已答 "+n+" / 50";
+}
+
+/* 防止答题中误关闭 */
+window.addEventListener("beforeunload",function(e){
+  if(currentRec&&!currentRec.done){
+    e.preventDefault();e.returnValue="答题尚未提交，确定离开吗？";
+  }
+});
+
+/* ================= 提交与判分 ================= */
+function doSubmit(){
+  var answered = Object.keys(currentRec.answers).filter(function(k){return currentRec.answers[k];}).length;
+  var blank = 50 - answered;
+  var msg = blank>0
+    ? "你还有 "+blank+" 道题未作答（未作答不得分）。确定现在提交吗？提交后不能再次作答。"
+    : "确定提交试卷吗？提交后将立即显示成绩，且不能再次作答。";
+  if(!window.confirm(msg))return;
+  if(blank>0 && !window.confirm("请再次确认：还有 "+blank+" 道题未答，提交后无法修改。是否确认提交？"))return;
+
+  var correct=0, wrong=0;
+  var details=[];
+  QUESTIONS.forEach(function(q,i){
+    var mine=(currentRec.answers[i]||"").split("").sort().join("");
+    var truth=truthAns(i);
+    var ok = mine!=="" && mine===truth;
+    if(mine===""){wrong++;}
+    else if(ok){correct++;}else{wrong++;}
+    details.push({mine:mine,truth:truth,ok:ok,blank:mine===""});
+  });
+  var submitTs=Date.now();
+  currentRec.done=true;
+  currentRec.submitTs=submitTs;
+  currentRec.durationSec=Math.max(0,Math.floor((submitTs-currentRec.startTs)/1000));
+  currentRec.score=correct*2;
+  currentRec.correct=correct;
+  currentRec.wrong=wrong; /* 含未答 */
+  currentRec.blank=blank;
+  currentRec.details=details;
+  putRec(currentSid,currentRec);
+  renderResult(false);
+}
+$("btn-submit").onclick=doSubmit;
+$("btn-submit2").onclick=doSubmit;
+
+/* ================= 成绩页 ================= */
+function renderResult(repeatView){
+  clearInterval(timerHandle);
+  currentRec = getRec(currentSid);
+  show("view-result");
+  $("r-id").textContent=currentSid;
+  $("r-name").textContent=currentRec.name;
+  $("r-score").textContent=currentRec.score;
+  $("r-correct").textContent=currentRec.correct;
+  $("r-blank").textContent=currentRec.blank;
+  $("r-wrong").textContent=(currentRec.wrong-currentRec.blank);
+  $("r-rate").textContent=Math.round(currentRec.correct/50*100)+"%";
+  $("r-duration").textContent=fmtDuration(currentRec.durationSec||0);
+  var grade=$("r-grade");
+  if(currentRec.score>=60){grade.textContent="成绩合格";grade.className="score-grade g-pass";}
+  else{grade.textContent="成绩未合格";grade.className="score-grade g-fail";}
+  var d=new Date(currentRec.submitTs);
+  function p(x){return (x<10?"0":"")+x;}
+  $("r-time").textContent="提交时间："+d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+
+    " "+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds());
+
+  var isTeacherRole = currentRec.role==="teacher";
+  $("result-actions").style.display = isTeacherRole ? "block" : "none";
+  $("shot-tip").textContent = isTeacherRole
+    ? "教师预览模式：本成绩单仅供检查题目与答案，不计入正式成绩，可重新作答。"
+    : "请将本成绩单截图发送给任课教师（刘海斌老师），谢谢配合！";
+
+  var banner=$("done-banner");
+  banner.className="done-banner";
+  banner.style.background="";banner.style.borderColor="";banner.style.color="";
+  if(isTeacherRole){
+    banner.style.display="block";
+    banner.style.background="#eff6ff";banner.style.borderColor="#bfdbfe";banner.style.color="#1e40af";
+    banner.textContent="教师预览模式：本成绩不计入正式成绩，你可以点击下方按钮重新作答。";
+  }else if(repeatView){
+    banner.style.display="block";
+    banner.textContent="该学号已于 "+$("r-time").textContent.replace("提交时间：","")+" 提交过测试，成绩如下。每个学号仅有一次机会，不能重复作答。";
+  }else{
+    banner.style.display="none";
+  }
+
+  /* 答题详情 */
+  var box=$("review-body");box.innerHTML="";
+  var letters=["A","B","C","D"];
+  QUESTIONS.forEach(function(q,i){
+    var det=currentRec.details[i];
+    var div=document.createElement("div");
+    div.className="rv "+(det.ok?"ok":"bad");
+    var mineTxt = det.blank ? '<span style="color:var(--amber);">未作答</span>' : '<span class="mine">'+det.mine+'</span>';
+    div.innerHTML='<div class="rv-q"><span class="mark">'+(det.ok?"✓":"✗")+'</span>'+(i+1)+". "+q.q+
+      ' <span class="tag '+(q.m?"multi":"single")+'">'+(q.m?"多选":"单选")+'</span></div>'+
+      '<div class="ans-line">你的答案：'+mineTxt+'　|　正确答案：<span class="truth">'+det.truth+'</span></div>';
+    box.appendChild(div);
+  });
+}
+
+/* ================= 教师预览：重新作答 ================= */
+$("btn-teacher-retake").onclick=function(){
+  if(!currentRec||currentRec.role!=="teacher"){window.alert("该功能仅教师测试号可用。");return;}
+  var all=loadAll();delete all[currentSid];saveAll(all);
+  currentRec={name:TEACHER_ACCOUNT.name,startTs:Date.now(),answers:{},done:false,role:"teacher"};
+  putRec(currentSid,currentRec);
+  renderExam(false);
+};
+
+/* ================= 教师管理 ================= */
+$("teacher-link").onclick=function(){
+  var pin=window.prompt("请输入教师管理口令：");
+  if(pin===null)return;
+  if(pin!==TEACHER_PIN){window.alert("口令不正确。");return;}
+  var n=Object.keys(loadAll()).length;
+  if(window.confirm("当前本机共有 "+n+" 条考试记录。\n确定清除全部作答记录（所有学生将可重新考试）吗？")){
+    localStorage.removeItem(STORE_KEY);
+    currentSid=null;currentRec=null;
+    window.alert("已清除全部记录。");
+    location.reload();
+  }
+};
+</script>
+</body>
+</html>
